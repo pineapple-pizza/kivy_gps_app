@@ -1,0 +1,12 @@
+certifi==2020.12.5
+chardet==4.0.0
+docutils==0.16
+idna==2.10
+Kivy @ https://github.com/kivy/kivy/archive/master.zip
+Kivy-Garden==0.1.4
+kivy-garden.mapview==1.0.5
+Pillow==8.1.2
+Pygments==2.8.1
+python-decouple==3.4
+requests==2.25.1
+urllib3==1.26.3
