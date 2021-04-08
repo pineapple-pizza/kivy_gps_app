@@ -14,9 +14,8 @@ GitHub Gist -
 __all__ = ("start", "sleep", "event")
 
 import types
-from collections import namedtuple
 from functools import partial
-
+from collections import namedtuple
 from kivy.clock import Clock
 
 CallbackParameter = namedtuple("CallbackParameter", ("args", "kwargs"))

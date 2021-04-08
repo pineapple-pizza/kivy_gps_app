@@ -1,90 +1,109 @@
 """
-Components/Tooltip
-==================
+Tooltip
+=======
 
-.. seealso::
+Tooltips display informative text when users hover over, focus on,
+or tap an element.
 
-    `Material Design spec, Tooltips <https://material.io/components/tooltips>`_
+Copyright (c) 2015 Andrés Rodríguez and KivyMD contributors -
+    KivyMD library up to version 0.1.2
+Copyright (c) 2019 Ivanov Yuri and KivyMD contributors -
+    KivyMD library version 0.1.3 and higher
 
-.. rubric:: Tooltips display informative text when users hover over, focus on,
-    or tap an element.
+For suggestions and questions:
+<kivydevelopment@gmail.com>
 
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/tooltip.png
-    :align: center
+This file is distributed under the terms of the same license,
+as the Kivy framework.
 
-To use the :class:`~MDTooltip` class, you must create a new class inherited
-from the :class:`~MDTooltip` class:
+`Material Design spec, Menus <https://material.io/components/tooltips/>`_
 
-In Kv-language:
+Example
+-------
 
-.. code-block:: kv
+from kivy.lang import Builder
+from kivy.factory import Factory
 
-    <TooltipMDIconButton@MDIconButton+MDTooltip>
+from kivymd.app import MDApp
 
-In Python code:
+Builder.load_string('''
+#:import random random
+#:import hex_colormap kivy.utils.hex_colormap
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import md_icons kivymd.icon_definitions.md_icons
 
-.. code-block:: python
+#:set ICONS list(md_icons.keys())
 
-    class TooltipMDIconButton(MDIconButton, MDTooltip):
-        pass
 
-.. Warning:: :class:`~MDTooltip` only works correctly with button and label classes.
+<IconButtonTooltips@MDIconButton+MDTooltip>
 
-.. code-block:: python
 
-    from kivy.lang import Builder
+<ExampleTooltips@BoxLayout>
+    orientation: 'vertical'
 
-    from kivymd.app import MDApp
-
-    KV = '''
-    <TooltipMDIconButton@MDIconButton+MDTooltip>
-
+    MDToolbar:
+        title: "Example Tooltips"
+        md_bg_color: get_color_from_hex(hex_colormap["crimson"])
+        elevation: 10
+        left_action_items: [['dots-vertical', lambda x: None]]
+        tooltip_text: "MDToolbar"
 
     Screen:
 
-        TooltipMDIconButton:
-            icon: "language-python"
-            tooltip_text: self.icon
-            pos_hint: {"center_x": .5, "center_y": .5}
-    '''
+        BoxLayout:
+            size_hint: None, None
+            size: self.minimum_size
+            padding: "10dp"
+            spacing: "10dp"
+            pos_hint: {'center_x': .5, "center_y": .9}
+
+            IconButtonTooltips:
+                icon: random.choice(ICONS)
+                tooltip_text: "MDIconButton"
+            IconButtonTooltips:
+                icon: random.choice(ICONS)
+                tooltip_text: "MDIconButton"
+            IconButtonTooltips:
+                icon: random.choice(ICONS)
+                tooltip_text: "MDIconButton"
+            IconButtonTooltips:
+                icon: random.choice(ICONS)
+                tooltip_text: "MDIconButton"
+            IconButtonTooltips:
+                icon: random.choice(ICONS)
+                tooltip_text: "MDIconButton"
+            IconButtonTooltips:
+                icon: random.choice(ICONS)
+                tooltip_text: "MDIconButton"
+''')
 
 
-    class Test(MDApp):
-        def build(self):
-            return Builder.load_string(KV)
+class Test(MDApp):
+    def build(self):
+        return Factory.ExampleTooltips()
 
 
-    Test().run()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/tooltip.gif
-    :align: center
-
-.. Note:: The behavior of tooltips on desktop and mobile devices is different.
-    For more detailed information,
-    `click here <https://github.com/kivymd/KivyMD/wiki/Components-Tooltips>`_.
+Test().run()
 """
 
-__all__ = ("MDTooltip", "MDTooltipViewClass")
-
-from kivy.animation import Animation
-from kivy.clock import Clock
-from kivy.core.window import Window
-from kivy.lang import Builder
-from kivy.metrics import dp
-from kivy.properties import (
-    BoundedNumericProperty,
-    ColorProperty,
-    ListProperty,
-    NumericProperty,
-    OptionProperty,
-    StringProperty,
+__all__ = (
+    "MDTooltip",
+    "MDTooltipViewClass",
 )
-from kivy.uix.boxlayout import BoxLayout
 
-from kivymd.font_definitions import theme_font_styles
-from kivymd.material_resources import DEVICE_TYPE
+from functools import partial
+
+from kivy.clock import Clock
+from kivy.animation import Animation
+from kivy.core.window import Window
+from kivy.metrics import dp
+from kivy.lang import Builder
+from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import ListProperty, StringProperty, NumericProperty
+
 from kivymd.theming import ThemableBehavior
-from kivymd.uix.behaviors import HoverBehavior, TouchBehavior
+from kivymd.uix.behaviors import HoverBehavior
+from kivymd.material_resources import DEVICE_TYPE
 
 Builder.load_string(
     """
@@ -97,6 +116,12 @@ Builder.load_string(
     height: self.minimum_height + root.padding[1]
     opacity: 0
 
+    padding:
+        dp(8) if DEVICE_TYPE == "desktop" else dp(16), \
+        dp(4), \
+        dp(8) if DEVICE_TYPE == "desktop" else dp(16), \
+        dp(4)
+
     canvas.before:
         PushMatrix
         Color:
@@ -106,7 +131,7 @@ Builder.load_string(
         RoundedRectangle:
             pos: self.pos
             size: self.size
-            radius: root.tooltip_radius
+            radius: [5]
         Scale:
             origin: self.center
             x: root._scale_x
@@ -114,17 +139,14 @@ Builder.load_string(
     canvas.after:
         PopMatrix
 
-    MDLabel:
+
+    Label:
         id: label_tooltip
         text: root.tooltip_text
         size_hint: None, None
-        -text_size: None, None
         size: self.texture_size
         bold: True
-        theme_text_color: "Custom"
-        font_style: root.tooltip_font_style
-        markup: True
-        text_color:
+        color:
             ([0, 0, 0, 1] if not root.tooltip_text_color else root.tooltip_text_color) \
             if root.theme_cls.theme_style == "Dark" else \
             ([1, 1, 1, 1] if not root.tooltip_text_color else root.tooltip_text_color)
@@ -133,73 +155,48 @@ Builder.load_string(
 )
 
 
-class MDTooltip(ThemableBehavior, HoverBehavior, TouchBehavior):
-    tooltip_bg_color = ColorProperty(None)
-    """
-    Tooltip background color in ``rgba`` format.
+class MDTooltipViewClass(ThemableBehavior, BoxLayout):
+    tooltip_bg_color = ListProperty()
+    tooltip_text_color = ListProperty()
+    tooltip_text = StringProperty()
 
-    :attr:`tooltip_bg_color` is an :class:`~kivy.properties.ColorProperty`
-    and defaults to `None`.
-    """
+    _scale_x = NumericProperty(0)
+    _scale_y = NumericProperty(0)
 
-    tooltip_text_color = ColorProperty(None)
-    """
-    Tooltip text color in ``rgba`` format.
 
-    :attr:`tooltip_text_color` is an :class:`~kivy.properties.ColorProperty`
-    and defaults to `None`.
-    """
+class MDTooltip(ThemableBehavior, HoverBehavior, BoxLayout):
+    tooltip_bg_color = ListProperty()
+    """Tooltip background color."""
+
+    tooltip_text_color = ListProperty()
+    """Tooltip text color."""
 
     tooltip_text = StringProperty()
-    """
-    Tooltip text.
+    """Tooltip text."""
 
-    :attr:`tooltip_text` is an :class:`~kivy.properties.StringProperty`
-    and defaults to `''`.
-    """
-
-    tooltip_font_style = OptionProperty("Caption", options=theme_font_styles)
-    """
-    Tooltip font style. Available options are: `'H1'`, `'H2'`, `'H3'`, `'H4'`,
-    `'H5'`, `'H6'`, `'Subtitle1'`, `'Subtitle2'`, `'Body1'`, `'Body2'`,
-    `'Button'`, `'Caption'`, `'Overline'`, `'Icon'`.
-
-    :attr:`tooltip_font_style` is an :class:`~kivy.properties.OptionProperty`
-    and defaults to `'Caption'`.
-    """
-
-    tooltip_radius = ListProperty(
-        [
-            dp(7),
-        ]
-    )
-    """
-    Corner radius values.
-
-    :attr:`radius` is an :class:`~kivy.properties.ListProperty`
-    and defaults to `[dp(7),]`.
-    """
-
-    tooltip_display_delay = BoundedNumericProperty(0, min=0, max=4)
-    """
-    Tooltip dsiplay delay.
-
-    :attr:`tooltip_display_delay` is an :class:`~kivy.properties.BoundedNumericProperty`
-    and defaults to `0`, min of `0` & max of `4`. This property only works on desktop.
-    """
-
-    shift_y = NumericProperty()
-    """
-    Y-offset of tooltip text.
-
-    :attr:`shift_y` is an :class:`~kivy.properties.StringProperty`
-    and defaults to `0`.
-    """
+    duration_long_touch = NumericProperty(0.4)
+    """Time for a long touch until a tooltip appears.
+    Used only on mobile devices."""
 
     _tooltip = None
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bind(
+            on_touch_down=self.create_clock, on_touch_up=self.delete_clock,
+        )
+
+    # Methods `create_clock` and `delete_clock` taken from this source -
+    # https://github.com/kivy/kivy/wiki/Menu-on-long-touch
+
+    def create_clock(self, widget, touch, *args):
+        if self.collide_point(touch.x, touch.y):
+            callback = partial(self.on_long_touch, touch)
+            Clock.schedule_once(callback, self.duration_long_touch)
+            touch.ud["event"] = callback
+
     def delete_clock(self, widget, touch, *args):
-        if self.collide_point(touch.x, touch.y) and touch.grab_current:
+        if self.collide_point(touch.x, touch.y):
             try:
                 Clock.unschedule(touch.ud["event"])
             except KeyError:
@@ -210,13 +207,11 @@ class MDTooltip(ThemableBehavior, HoverBehavior, TouchBehavior):
         """Returns the coordinates of the tooltip
         that fit into the borders of the screen."""
 
-        # If the position of the tooltip is outside the right border
-        # of the screen.
+        # If the position of the tooltip is outside the right border of the screen.
         if x + self._tooltip.width > Window.width:
             x = Window.width - (self._tooltip.width + dp(10))
         else:
-            # If the position of the tooltip is outside the left border
-            # of the screen.
+            # If the position of the tooltip is outside the left border of the screen.
             if x < 0:
                 x = "10dp"
         # If the tooltip position is below bottom the screen border.
@@ -234,21 +229,10 @@ class MDTooltip(ThemableBehavior, HoverBehavior, TouchBehavior):
         Window.add_widget(self._tooltip)
         pos = self.to_window(self.center_x, self.center_y)
         x = pos[0] - self._tooltip.width / 2
-
-        if not self.shift_y:
-            y = pos[1] - self._tooltip.height / 2 - self.height / 2 - dp(20)
-        else:
-            y = pos[1] - self._tooltip.height / 2 - self.height + self.shift_y
-
+        y = pos[1] - self._tooltip.height / 2 - self.height / 2 - dp(20)
         x, y = self.adjust_tooltip_position(x, y)
         self._tooltip.pos = (x, y)
-
-        if DEVICE_TYPE == "desktop":
-            Clock.schedule_once(
-                self.animation_tooltip_show, self.tooltip_display_delay
-            )
-        else:
-            Clock.schedule_once(self.animation_tooltip_show, 0)
+        Clock.schedule_once(self.animation_tooltip_show, 0)
 
     def animation_tooltip_show(self, interval):
         if not self._tooltip:
@@ -266,11 +250,8 @@ class MDTooltip(ThemableBehavior, HoverBehavior, TouchBehavior):
             self.on_enter(True)
 
     def on_enter(self, *args):
-        """See
-        :attr:`~kivymd.uix.behaviors.hover_behavior.HoverBehavior.on_enter`
-        method in :class:`~kivymd.uix.behaviors.hover_behavior.HoverBehavior`
-        class.
-        """
+        """See method `on_enter`
+        in `kivymd.uix.behaviors.hover_behavior.HoverBehavior` class."""
 
         if not args and DEVICE_TYPE != "desktop":
             return
@@ -281,57 +262,13 @@ class MDTooltip(ThemableBehavior, HoverBehavior, TouchBehavior):
                 tooltip_bg_color=self.tooltip_bg_color,
                 tooltip_text_color=self.tooltip_text_color,
                 tooltip_text=self.tooltip_text,
-                tooltip_font_style=self.tooltip_font_style,
-                tooltip_radius=self.tooltip_radius,
             )
             Clock.schedule_once(self.display_tooltip, -1)
 
     def on_leave(self):
-        """See
-        :attr:`~kivymd.uix.behaviors.hover_behavior.HoverBehavior.on_leave`
-        method in :class:`~kivymd.uix.behaviors.hover_behavior.HoverBehavior`
-        class.
-        """
+        """See method `on_leave`
+        in `kivymd.uix.behaviors.hover_behavior.HoverBehavior` class."""
 
         if self._tooltip:
             Window.remove_widget(self._tooltip)
             self._tooltip = None
-
-
-class MDTooltipViewClass(ThemableBehavior, BoxLayout):
-    tooltip_bg_color = ColorProperty(None)
-    """
-    See :attr:`~MDTooltip.tooltip_bg_color`.
-    """
-
-    tooltip_text_color = ColorProperty(None)
-    """
-    See :attr:`~MDTooltip.tooltip_text_color`.
-    """
-
-    tooltip_text = StringProperty()
-    """
-    See :attr:`~MDTooltip.tooltip_text`.
-    """
-
-    tooltip_font_style = OptionProperty("Caption", options=theme_font_styles)
-    """
-    See :attr:`~MDTooltip.tooltip_font_style`.
-    """
-
-    tooltip_radius = ListProperty()
-    """
-    See :attr:`~MDTooltip.tooltip_radius`.
-    """
-
-    _scale_x = NumericProperty(0)
-    _scale_y = NumericProperty(0)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.padding = [
-            dp(8) if DEVICE_TYPE == "desktop" else dp(16),
-            dp(4),
-            dp(8) if DEVICE_TYPE == "desktop" else dp(16),
-            dp(4),
-        ]

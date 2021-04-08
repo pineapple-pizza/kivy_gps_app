@@ -1,10 +1,17 @@
-#:include mymapview.kv
+#:include app_lib/mymapview.kv
+#:import hex kivy.utils.get_color_from_hex
+
+#:set teal_color hex('#84CDCF')
+#:set white_color hex('#ffffff')
 
 BoxLayout:
     orientation: 'vertical'
     MDToolbar:
         title: 'Elevages de chiens'
+        anchor_title: 'center'
+        md_bg_color: teal_color
         right_action_items: [['magnify', lambda x: app.search_menu.open()]]
-        md_bg_color: app.theme_cls.primary_color
+        left_action_items: [["dog-side", lambda x: x]]
+
     MyMapView:
         id: mapview

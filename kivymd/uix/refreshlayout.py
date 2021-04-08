@@ -1,113 +1,121 @@
 """
-Components/Refresh Layout
+ScrollView Refresh Layout
 =========================
+
+Copyright (c) 2019 Ivanov Yuri
+
+For suggestions and questions:
+<kivydevelopment@gmail.com>
+
+This file is distributed under the terms of the same license,
+as the Kivy framework.
 
 Example
 -------
 
-.. code-block:: python
+from kivymd.app import MDApp
+from kivy.clock import Clock
+from kivy.lang import Builder
+from kivy.factory import Factory
+from kivy.properties import StringProperty
 
-    from kivymd.app import MDApp
-    from kivy.clock import Clock
-    from kivy.lang import Builder
-    from kivy.factory import Factory
-    from kivy.properties import StringProperty
+from kivymd.uix.button import MDIconButton
+from kivymd.icon_definitions import md_icons
+from kivymd.uix.list import ILeftBodyTouch, OneLineIconListItem
+from kivymd.theming import ThemeManager
+from kivymd.utils import asynckivy
 
-    from kivymd.uix.button import MDIconButton
-    from kivymd.icon_definitions import md_icons
-    from kivymd.uix.list import ILeftBodyTouch, OneLineIconListItem
-    from kivymd.theming import ThemeManager
-    from kivymd.utils import asynckivy
+Builder.load_string('''
+<ItemForList>
+    text: root.text
 
-    Builder.load_string('''
-    <ItemForList>
-        text: root.text
-
-        IconLeftSampleWidget:
-            icon: root.icon
+    IconLeftSampleWidget:
+        icon: root.icon
 
 
-    <Example@FloatLayout>
+<Example@FloatLayout>
 
-        BoxLayout:
-            orientation: 'vertical'
+    BoxLayout:
+        orientation: 'vertical'
 
-            MDToolbar:
-                title: app.title
-                md_bg_color: app.theme_cls.primary_color
-                background_palette: 'Primary'
-                elevation: 10
-                left_action_items: [['menu', lambda x: x]]
+        MDToolbar:
+            title: app.title
+            md_bg_color: app.theme_cls.primary_color
+            background_palette: 'Primary'
+            elevation: 10
+            left_action_items: [['menu', lambda x: x]]
 
-            MDScrollViewRefreshLayout:
-                id: refresh_layout
-                refresh_callback: app.refresh_callback
-                root_layout: root
+        MDScrollViewRefreshLayout:
+            id: refresh_layout
+            refresh_callback: app.refresh_callback
+            root_layout: root
 
-                MDGridLayout:
-                    id: box
-                    adaptive_height: True
-                    cols: 1
-    ''')
-
-
-    class IconLeftSampleWidget(ILeftBodyTouch, MDIconButton):
-        pass
+            GridLayout:
+                id: box
+                size_hint_y: None
+                height: self.minimum_height
+                cols: 1
+''')
 
 
-    class ItemForList(OneLineIconListItem):
-        icon = StringProperty()
+class IconLeftSampleWidget(ILeftBodyTouch, MDIconButton):
+    pass
 
 
-    class Example(MDApp):
-        title = 'Example Refresh Layout'
-        screen = None
-        x = 0
-        y = 15
+class ItemForList(OneLineIconListItem):
+    icon = StringProperty()
 
-        def build(self):
-            self.screen = Factory.Example()
+
+class Example(MDApp):
+    title = 'Example Refresh Layout'
+    screen = None
+    x = 0
+    y = 15
+
+    def build(self):
+        self.screen = Factory.Example()
+        self.set_list()
+
+        return self.screen
+
+    def set_list(self):
+        async def set_list():
+            names_icons_list = list(md_icons.keys())[self.x:self.y]
+            for name_icon in names_icons_list:
+                await asynckivy.sleep(0)
+                self.screen.ids.box.add_widget(
+                    ItemForList(icon=name_icon, text=name_icon))
+        asynckivy.start(set_list())
+
+    def refresh_callback(self, *args):
+        '''A method that updates the state of your application
+        while the spinner remains on the screen.'''
+
+        def refresh_callback(interval):
+            self.screen.ids.box.clear_widgets()
+            if self.x == 0:
+                self.x, self.y = 15, 30
+            else:
+                self.x, self.y = 0, 15
             self.set_list()
+            self.screen.ids.refresh_layout.refresh_done()
+            self.tick = 0
 
-            return self.screen
-
-        def set_list(self):
-            async def set_list():
-                names_icons_list = list(md_icons.keys())[self.x:self.y]
-                for name_icon in names_icons_list:
-                    await asynckivy.sleep(0)
-                    self.screen.ids.box.add_widget(
-                        ItemForList(icon=name_icon, text=name_icon))
-            asynckivy.start(set_list())
-
-        def refresh_callback(self, *args):
-            '''A method that updates the state of your application
-            while the spinner remains on the screen.'''
-
-            def refresh_callback(interval):
-                self.screen.ids.box.clear_widgets()
-                if self.x == 0:
-                    self.x, self.y = 15, 30
-                else:
-                    self.x, self.y = 0, 15
-                self.set_list()
-                self.screen.ids.refresh_layout.refresh_done()
-                self.tick = 0
-
-            Clock.schedule_once(refresh_callback, 1)
+        Clock.schedule_once(refresh_callback, 1)
 
 
-    Example().run()
+Example().run()
+
 """
 
 from kivy.animation import Animation
-from kivy.core.window import Window
 from kivy.effects.dampedscroll import DampedScrollEffect
 from kivy.lang import Builder
 from kivy.metrics import dp
-from kivy.properties import ColorProperty, NumericProperty, ObjectProperty
+from kivy.properties import NumericProperty, ObjectProperty, ListProperty
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scrollview import ScrollView
+from kivy.core.window import Window
 
 from kivymd.theming import ThemableBehavior
 
@@ -149,7 +157,7 @@ class _RefreshScrollEffect(DampedScrollEffect):
     If you need any documentation please look at kivy.effects.dampedscrolleffect.
     """
 
-    min_scroll_to_reload = NumericProperty("-100dp")
+    min_scroll_to_reload = NumericProperty(-dp(100))
     """Minimum overscroll value to reload."""
 
     def on_overscroll(self, scrollview, overscroll):
@@ -192,7 +200,7 @@ class MDScrollViewRefreshLayout(ScrollView):
 
 
 class RefreshSpinner(ThemableBehavior, FloatLayout):
-    spinner_color = ColorProperty([1, 1, 1, 1])
+    spinner_color = ListProperty([1, 1, 1, 1])
 
     _refresh_layout = ObjectProperty()
     """kivymd.refreshlayout.MDScrollViewRefreshLayout object."""

@@ -1,0 +1,16 @@
+#:import MapView kivy.garden.mapview.MapView
+#:import hex kivy.utils.get_color_from_hex
+
+#:set teal_color hex('#84CDCF')
+#:set white_color hex('#ffffff')
+
+<MyMapView>:
+    lat: 48.53333
+    lon: 2.66667
+    zoom: 10
+    on_zoom: 
+        self.zoom = 10 if self.zoom < 10 else self.zoom
+    on_lat:
+        self.start_getting_infos()
+    on_lon:
+        self.start_getting_infos()

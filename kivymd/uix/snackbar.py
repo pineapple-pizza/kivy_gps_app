@@ -1,218 +1,161 @@
 """
-Components/Snackbar
-===================
+Snackbars
+=========
 
-.. seealso::
+Copyright (c) 2019 Ivanov Yuri
 
-    `Material Design spec, Snackbars <https://material.io/components/snackbars>`_
+For suggestions and questions:
+<kivydevelopment@gmail.com>
 
-.. rubric:: Snackbars provide brief messages about app processes at the bottom
-    of the screen.
+This file is distributed under the terms of the same license,
+as the Kivy framework.
 
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/snackbar.png
-    :align: center
+`Material Design spec, Snackbars <https://material.io/design/components/snackbars.html>`_
 
-Usage
------
+Example
+=======
 
-.. code-block:: python
+from kivymd.app import MDApp
+from kivy.animation import Animation
+from kivy.clock import Clock
+from kivy.metrics import dp
+from kivy.lang import Builder
 
-    from kivy.lang import Builder
+from kivymd.uix.snackbar import Snackbar
+from kivymd.theming import ThemeManager
+from kivymd.toast import toast
 
-    from kivymd.app import MDApp
-
-    KV = '''
-    #:import Snackbar kivymd.uix.snackbar.Snackbar
-
-
-    Screen:
-
-        MDRaisedButton:
-            text: "Create simple snackbar"
-            on_release: Snackbar(text="This is a snackbar!").open()
-            pos_hint: {"center_x": .5, "center_y": .5}
-    '''
+KV = '''
+#:import Window kivy.core.window.Window
 
 
-    class Test(MDApp):
-        def build(self):
-            return Builder.load_string(KV)
+Screen:
+    name: 'snackbar'
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(10)
+
+        MDToolbar:
+            title: 'Example Snackbar'
+            md_bg_color: app.theme_cls.primary_color
+            left_action_items: [['menu', lambda x: x]]
+            background_palette: 'Primary'
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: dp(10)
+            padding: dp(10)
+
+            Widget:
+
+            MDRaisedButton:
+                text: "Create simple snackbar"
+                pos_hint: {'center_x': .5}
+                on_release: app.show_example_snackbar('simple')
+
+            MDRaisedButton:
+                text: "Create snackbar with button"
+                pos_hint: {'center_x': .5}
+                on_release: app.show_example_snackbar('button')
+
+            MDRaisedButton:
+                text: "Create snackbar with a lot of text"
+                pos_hint: {'center_x': .5}
+                on_release: app.show_example_snackbar('verylong')
+
+            MDSeparator:
+
+            MDLabel:
+                text: 'Click the MDFloatingActionButton to show the following example...'
+                halign: 'center'
+
+            Widget:
+
+    MDFloatingActionButton:
+        id: button
+        md_bg_color: app.theme_cls.primary_color
+        x: Window.width - self.width - dp(10)
+        y: dp(10)
+        on_release: app.show_example_snackbar('float')
+'''
 
 
-    Test().run()
+class ExampleSnackBar(MDApp):
+    _interval = 0
+    my_snackbar = None
+    screen = None
 
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/snackbar-simple.gif
-    :align: center
+    def build(self):
+        self.screen = Builder.load_string(KV)
+        return self.screen
 
-Usage with snackbar_x, snackbar_y
----------------------------------
+    def show_example_snackbar(self, snack_type):
+        def callback(instance):
+            toast(instance.text)
 
-.. code-block:: python
-
-    Snackbar(
-        text="This is a snackbar!",
-        snackbar_x="10dp",
-        snackbar_y="10dp",
-        size_hint_x=(
-            Window.width - (dp(10) * 2)
-        ) / Window.width
-    ).open()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/snackbar-padding.gif
-    :align: center
-
-Control width
--------------
-
-.. code-block:: python
-
-    Snackbar(
-        text="This is a snackbar!",
-        snackbar_x="10dp",
-        snackbar_y="10dp",
-        size_hint_x=.5
-    ).open()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/snackbar-percent-width.png
-    :align: center
-
-Custom text color
------------------
-
-.. code-block:: python
-
-    Snackbar(
-        text="[color=#ddbb34]This is a snackbar![/color]",
-        snackbar_y="10dp",
-        snackbar_y="10dp",
-        size_hint_x=.7
-    ).open()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/snackbar-custom-color.png
-    :align: center
-
-Usage with button
------------------
-
-.. code-block:: python
-
-    snackbar = Snackbar(
-        text="This is a snackbar!",
-        snackbar_x="10dp",
-        snackbar_y="10dp",
-    )
-    snackbar.size_hint_x = (
-        Window.width - (snackbar.snackbar_x * 2)
-    ) / Window.width
-    snackbar.buttons = [
-        MDFlatButton(
-            text="UPDATE",
-            text_color=(1, 1, 1, 1),
-            on_release=snackbar.dismiss,
-        ),
-        MDFlatButton(
-            text="CANCEL",
-            text_color=(1, 1, 1, 1),
-            on_release=snackbar.dismiss,
-        ),
-    ]
-    snackbar.open()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/snackbar-button.png
-    :align: center
-
-Using a button with custom color
---------------------------------
-
-.. code-block:: python
-
-    Snackbar(
-        ...
-        bg_color=(0, 0, 1, 1),
-    ).open()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/snackbar-button-custom-color.png
-    :align: center
-
-Custom usage
-------------
-
-.. code-block:: python
-
-    from kivy.lang import Builder
-    from kivy.animation import Animation
-    from kivy.clock import Clock
-    from kivy.metrics import dp
-
-    from kivymd.app import MDApp
-    from kivymd.uix.snackbar import Snackbar
-
-
-    KV = '''
-    Screen:
-
-        MDFloatingActionButton:
-            id: button
-            x: root.width - self.width - dp(10)
-            y: dp(10)
-            on_release: app.snackbar_show()
-    '''
-
-
-    class Test(MDApp):
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-            self.screen = Builder.load_string(KV)
-            self.snackbar = None
-            self._interval = 0
-
-        def build(self):
-            return self.screen
-
-        def wait_interval(self, interval):
+        def wait_interval(interval):
             self._interval += interval
-            if self._interval > self.snackbar.duration + 0.5:
+            if self._interval > self.my_snackbar.duration:
                 anim = Animation(y=dp(10), d=.2)
                 anim.start(self.screen.ids.button)
-                Clock.unschedule(self.wait_interval)
+                Clock.unschedule(wait_interval)
                 self._interval = 0
-                self.snackbar = None
+                self.my_snackbar = None
 
-        def snackbar_show(self):
-            if not self.snackbar:
-                self.snackbar = Snackbar(text="This is a snackbar!")
-                self.snackbar.open()
+        if snack_type == 'simple':
+            Snackbar(text="This is a snackbar!").show()
+        elif snack_type == 'button':
+            Snackbar(text="This is a snackbar", button_text="with a button!",
+                     button_callback=callback).show()
+        elif snack_type == 'verylong':
+            Snackbar(text="This is a very very very very very very very "
+                          "long snackbar!").show()
+        elif snack_type == 'float':
+            if not self.my_snackbar:
+                self.my_snackbar = Snackbar(
+                    text="This is a snackbar!", button_text='Button',
+                    duration=3, button_callback=callback)
+                self.my_snackbar.show()
                 anim = Animation(y=dp(72), d=.2)
                 anim.bind(on_complete=lambda *args: Clock.schedule_interval(
-                    self.wait_interval, 0))
+                    wait_interval, 0))
                 anim.start(self.screen.ids.button)
 
 
-    Test().run()
+ExampleSnackBar().run()
+"""
 
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/snackbar-custom-usage.gif
-    :align: center
+from kivy.animation import Animation
+from kivy.clock import Clock
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.properties import ObjectProperty, StringProperty, NumericProperty
+from kivy.uix.floatlayout import FloatLayout
 
-Custom Snackbar
----------------
+from kivymd.uix.button import MDFlatButton
 
-.. code-block:: python
+Builder.load_string(
+    """
+#:import get_color_from_hex kivy.utils.get_color_from_hex
 
-    from kivy.lang import Builder
-    from kivy.core.window import Window
-    from kivy.properties import StringProperty, NumericProperty
 
-    from kivymd.app import MDApp
-    from kivymd.uix.button import MDFlatButton
-    from kivymd.uix.snackbar import BaseSnackbar
+<Snackbar>:
 
-    KV = '''
-    <CustomSnackbar>
+    BoxLayout:
+        id: box
+        size_hint_y: None
+        height: dp(58)
+        spacing: dp(5)
+        padding: dp(10)
+        y: -self.height
 
-        MDIconButton:
-            pos_hint: {'center_y': .5}
-            icon: root.icon
-            opposite_colors: True
+        canvas:
+            Color:
+                rgba: get_color_from_hex('323232')
+            Rectangle:
+                pos: self.pos
+                size: self.size
 
         MDLabel:
             id: text_bar
@@ -225,419 +168,82 @@ Custom Snackbar
             shorten: True
             shorten_from: 'right'
             pos_hint: {'center_y': .5}
-
-
-    Screen:
-
-        MDRaisedButton:
-            text: "SHOW"
-            pos_hint: {"center_x": .5, "center_y": .45}
-            on_press: app.show()
-    '''
-
-
-    class CustomSnackbar(BaseSnackbar):
-        text = StringProperty(None)
-        icon = StringProperty(None)
-        font_size = NumericProperty("15sp")
-
-
-    class Test(MDApp):
-        def build(self):
-            return Builder.load_string(KV)
-
-        def show(self):
-            snackbar = CustomSnackbar(
-                text="This is a snackbar!",
-                icon="information",
-                snackbar_x="10dp",
-                snackbar_y="10dp",
-                buttons=[MDFlatButton(text="ACTION", text_color=(1, 1, 1, 1))]
-            )
-            snackbar.size_hint_x = (
-                Window.width - (snackbar.snackbar_x * 2)
-            ) / Window.width
-            snackbar.open()
-
-
-    Test().run()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/snackbar-custom.png
-    :align: center
-"""
-
-__all__ = ("Snackbar",)
-
-from kivy.animation import Animation
-from kivy.clock import Clock
-from kivy.core.window import Window
-from kivy.lang import Builder
-from kivy.properties import (
-    BooleanProperty,
-    ColorProperty,
-    ListProperty,
-    NumericProperty,
-    OptionProperty,
-    StringProperty,
-)
-
-from kivymd.uix.button import BaseButton
-from kivymd.uix.card import MDCard
-
-Builder.load_string(
-    """
-#:import get_color_from_hex kivy.utils.get_color_from_hex
-#:import window kivy.core.window
-
-<BaseSnackbar>
-    size_hint_y: None
-    height: "58dp"
-    spacing: "10dp"
-    padding: "10dp", "10dp", "10dp", "10dp"
-    md_bg_color: get_color_from_hex("323232") if not root.bg_color else root.bg_color
-    radius: root.radius
-    elevation: 11 if root.padding else 0
-
-    canvas:
-        Color:
-            rgba: self.md_bg_color
-        RoundedRectangle:
-            size: self.size
-            pos: self.pos
-            radius: self.radius
-
-<Snackbar>
-
-    MDLabel:
-        id: text_bar
-        size_hint_y: None
-        height: self.texture_size[1]
-        text: root.text
-        font_size: root.font_size
-        theme_text_color: "Custom"
-        text_color: get_color_from_hex("ffffff")
-        shorten: True
-        shorten_from: "right"
-        markup: True
-        pos_hint: {"center_y": .5}
 """
 )
 
 
-class BaseSnackbar(MDCard):
+class Snackbar(FloatLayout):
+    """A Material Design Snackbar"""
+
+    text = StringProperty()
+    """The text that will appear in the Snackbar.
+
+    :attr:`text` is a :class:`~kivy.properties.StringProperty` 
+    and defaults to ''.
     """
-    :Events:
-        :attr:`on_open`
-            Called when a dialog is opened.
-        :attr:`on_dismiss`
-            When the front layer rises.
 
-    Abstract base class for all Snackbars.
-    This class handles sizing, positioning, shape and events for Snackbars
+    font_size = NumericProperty("15sp")
+    """The font size of the text that will appear in the Snackbar.
+    
+    :attr:`font_size` is a :class:`~kivy.properties.NumericProperty` and
+    defaults to 15sp.
+    """
 
-    All Snackbars will be made off of this `BaseSnackbar`.
+    button_text = StringProperty()
+    """The text that will appear in the Snackbar's button.
 
-    `BaseSnackbar` will always try to fill the remainder of the screen with
-    your Snackbar.
+    .. note::
+        If this variable is None, the Snackbar will have no button.
 
-    To make your Snackbar dynamic and symetric with snackbar_x.
+    :attr:`button_text` is a :class:`~kivy.properties.StringProperty`
+    and defaults to ''.
+    """
 
-    Set size_hint_x like below:
+    button_callback = ObjectProperty()
+    """The callback that will be triggered when the Snackbar's
+    button is pressed.
 
-    .. code-block:: python
+    .. note::
+        If this variable is None, the Snackbar will have no button.
 
-        size_hint_z = (
-            Window.width - (snackbar_x * 2)
-        ) / Window.width
+    :attr:`button_callback` is a :class:`~kivy.properties.ObjectProperty`
+    and defaults to None.
     """
 
     duration = NumericProperty(3)
-    """
-    The amount of time that the snackbar will stay on screen for.
+    """The amount of time that the Snackbar will stay on screen for.
 
     :attr:`duration` is a :class:`~kivy.properties.NumericProperty`
-    and defaults to `3`.
-    """
-
-    auto_dismiss = BooleanProperty(True)
-    """
-    Whether to use automatic closing of the snackbar or not.
-
-    :attr:`auto_dismiss` is a :class:`~kivy.properties.BooleanProperty`
-    and defaults to `'True'`.
-    """
-
-    bg_color = ColorProperty(None)
-    """
-    Snackbar background.
-
-    :attr:`bg_color` is a :class:`~kivy.properties.ColorProperty`
-    and defaults to `None`.
-    """
-
-    buttons = ListProperty()
-    """
-    Snackbar buttons.
-
-    :attr:`buttons` is a :class:`~kivy.properties.ListProperty`
-    and defaults to `'[]'`
-    """
-
-    radius = ListProperty([5, 5, 5, 5])
-    """
-    Snackbar radius.
-
-    :attr:`radius` is a :class:`~kivy.properties.ListProperty`
-    and defaults to `'[5, 5, 5, 5]'`
-    """
-
-    snackbar_animation_dir = OptionProperty(
-        "Bottom",
-        options=["Top", "Bottom", "Left", "Right"],
-    )
-    """
-    Snackbar animation direction.
-
-    Available options are: `"Top"`, `"Bottom"`, `"Left"`, `"Right"`
-
-    :attr:`snackbar_animation_dir` is an :class:`~kivy.properties.OptionProperty`
-    and defaults to `'Bottom'`.
-    """
-
-    snackbar_x = NumericProperty("0dp")
-    """
-    The snackbar x position in the screen
-
-    :attr:`snackbar_x` is a :class:`~kivy.properties.NumericProperty`
-    and defaults to `0dp`.
-    """
-
-    snackbar_y = NumericProperty("0dp")
-    """
-    The snackbar x position in the screen
-
-    :attr:`snackbar_y` is a :class:`~kivy.properties.NumericProperty`
-    and defaults to `0dp`.
+    and defaults to 3.
     """
 
     _interval = 0
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.register_event_type("on_open")
-        self.register_event_type("on_dismiss")
+        if self.button_text != "":
+            button = MDFlatButton(text=self.button_text)
+            self.ids.box.add_widget(button)
+            if self.button_callback:
+                button.bind(on_release=self.button_callback)
 
-    def dismiss(self, *args):
-        """Dismiss the snackbar."""
-
-        def dismiss(interval):
-            if self.snackbar_animation_dir == "Top":
-                anim = Animation(y=(Window.height + self.height), d=0.2)
-            elif self.snackbar_animation_dir == "Left":
-                anim = Animation(x=-self.width, d=0.2)
-            elif self.snackbar_animation_dir == "Right":
-                anim = Animation(x=Window.width, d=0.2)
-            else:
-                anim = Animation(y=-self.height, d=0.2)
-
-            anim.bind(
-                on_complete=lambda *args: Window.parent.remove_widget(self)
-            )
-            anim.start(self)
-
-        Clock.schedule_once(dismiss, 0.5)
-        self.dispatch("on_dismiss")
-
-    def open(self):
-        """Show the snackbar."""
+    def show(self):
+        """Show the Snackbar."""
 
         def wait_interval(interval):
             self._interval += interval
             if self._interval > self.duration:
-                self.dismiss()
+                anim = Animation(y=-self.ids.box.height, d=0.2)
+                anim.bind(
+                    on_complete=lambda *args: Window.parent.remove_widget(self)
+                )
+                anim.start(self.ids.box)
                 Clock.unschedule(wait_interval)
                 self._interval = 0
 
-        for c in Window.parent.children:
-            if isinstance(c, BaseSnackbar):
-                return
-
-        if self.snackbar_y > (Window.height - self.height):
-            self.snackbar_y = Window.height - self.height
-
-        self._calc_radius()
-
-        if self.size_hint_x == 1:
-            self.size_hint_x = (Window.width - self.snackbar_x) / Window.width
-
-        if (
-            self.snackbar_animation_dir == "Top"
-            or self.snackbar_animation_dir == "Bottom"
-        ):
-            self.x = self.snackbar_x
-
-            if self.snackbar_animation_dir == "Top":
-                self.y = Window.height + self.height
-            else:
-                self.y = -self.height
-
-            Window.parent.add_widget(self)
-
-            if self.snackbar_animation_dir == "Top":
-                anim = Animation(
-                    y=self.snackbar_y
-                    if self.snackbar_y != 0
-                    else Window.height - self.height,
-                    d=0.2,
-                )
-            else:
-                anim = Animation(
-                    y=self.snackbar_y if self.snackbar_y != 0 else 0, d=0.2
-                )
-
-        elif (
-            self.snackbar_animation_dir == "Left"
-            or self.snackbar_animation_dir == "Right"
-        ):
-            self.y = self.snackbar_y
-
-            if self.snackbar_animation_dir == "Left":
-                self.x = -Window.width
-            else:
-                self.x = Window.width
-
-            Window.parent.add_widget(self)
-            anim = Animation(
-                x=self.snackbar_x if self.snackbar_x != 0 else 0, d=0.2
-            )
-
-        if self.auto_dismiss:
-            anim.bind(
-                on_complete=lambda *args: Clock.schedule_interval(
-                    wait_interval, 0
-                )
-            )
-        anim.start(self)
-        self.dispatch("on_open")
-
-    def on_open(self, *args):
-        """Called when a dialog is opened."""
-
-    def on_dismiss(self, *args):
-        """Called when the dialog is closed."""
-
-    def on_buttons(self, instance, value):
-        def on_buttons(interval):
-            for button in value:
-                if issubclass(button.__class__, (BaseButton,)):
-                    self.add_widget(button)
-                else:
-                    raise ValueError(
-                        f"The {button} object must be inherited from the base class <BaseButton>"
-                    )
-
-        Clock.schedule_once(on_buttons)
-
-    def _calc_radius(self):
-        if (
-            self.snackbar_animation_dir == "Top"
-            or self.snackbar_animation_dir == "Bottom"
-        ):
-
-            if self.snackbar_y == 0 and self.snackbar_x == 0:
-
-                if self.size_hint_x == 1:
-                    self.radius = [0, 0, 0, 0]
-                else:
-                    if self.snackbar_animation_dir == "Top":
-                        self.radius = [0, 0, self.radius[2], 0]
-                    else:
-                        self.radius = [0, self.radius[1], 0, 0]
-
-            elif self.snackbar_y != 0 and self.snackbar_x == 0:
-
-                if self.size_hint_x == 1:
-                    self.radius = [0, 0, 0, 0]
-                else:
-                    if self.snackbar_y >= Window.height - self.height:
-                        self.radius = [0, 0, self.radius[2], 0]
-                    else:
-                        self.radius = [0, self.radius[1], self.radius[2], 0]
-
-            elif self.snackbar_y == 0 and self.snackbar_x != 0:
-
-                if self.size_hint_x == 1:
-                    if self.snackbar_animation_dir == "Top":
-                        self.radius = [0, 0, 0, self.radius[3]]
-                    else:
-                        self.radius = [self.radius[0], 0, 0, 0]
-                else:
-                    if self.snackbar_animation_dir == "Top":
-                        self.radius = [0, 0, self.radius[2], self.radius[3]]
-                    else:
-                        self.radius = [self.radius[0], self.radius[1], 0, 0]
-
-            else:  # self.snackbar_y != 0 and self.snackbar_x != 0
-
-                if self.size_hint_x == 1:
-                    self.radius = [self.radius[0], 0, 0, self.radius[3]]
-                elif self.snackbar_y >= Window.height - self.height:
-                    self.radius = [0, 0, self.radius[2], self.radius[3]]
-
-        elif (
-            self.snackbar_animation_dir == "Left"
-            or self.snackbar_animation_dir == "Right"
-        ):
-
-            if self.snackbar_y == 0 and self.snackbar_x == 0:
-
-                if self.size_hint_x == 1:
-                    self.radius = [0, 0, 0, 0]
-                else:
-                    self.radius = [0, self.radius[1], 0, 0]
-
-            elif self.snackbar_y != 0 and self.snackbar_x == 0:
-
-                if self.size_hint_x == 1:
-                    self.radius = [0, 0, 0, 0]
-                else:
-                    self.radius = [0, self.radius[1], self.radius[2], 0]
-
-            elif self.snackbar_y == 0 and self.snackbar_x != 0:
-
-                if self.size_hint_x == 1:
-                    self.radius = [self.radius[0], 0, 0, 0]
-                else:
-                    self.radius = [self.radius[0], self.radius[1], 0, 0]
-
-            else:  # self.snackbar_y != 0 and self.snackbar_x != 0
-
-                if self.size_hint_x == 1:
-                    if self.snackbar_y >= Window.height - self.height:
-                        self.radius = [0, 0, 0, self.radius[3]]
-                    else:
-                        self.radius = [self.radius[0], 0, 0, self.radius[3]]
-                elif self.snackbar_y >= Window.height - self.height:
-                    self.radius = [0, 0, self.radius[2], self.radius[3]]
-
-
-class Snackbar(BaseSnackbar):
-    """
-    Snackbar inherits all its functionality from `BaseSnackbar`
-    """
-
-    text = StringProperty()
-    """
-    The text that will appear in the snackbar.
-
-    :attr:`text` is a :class:`~kivy.properties.StringProperty`
-    and defaults to `''`.
-    """
-
-    font_size = NumericProperty("15sp")
-    """
-    The font size of the text that will appear in the snackbar.
-
-    :attr:`font_size` is a :class:`~kivy.properties.NumericProperty` and
-    defaults to `'15sp'`.
-    """
+        Window.parent.add_widget(self)
+        anim = Animation(y=0, d=0.2)
+        anim.bind(
+            on_complete=lambda *args: Clock.schedule_interval(wait_interval, 0)
+        )
+        anim.start(self.ids.box)

@@ -1,226 +1,33 @@
 """
-Components/Label
-================
+Label
+=====
 
-.. rubric:: The :class:`MDLabel` widget is for rendering text.
+Copyright (c) 2015 Andrés Rodríguez and KivyMD contributors -
+    KivyMD library up to version 0.1.2
+Copyright (c) 2019 Ivanov Yuri and KivyMD contributors -
+    KivyMD library version 0.1.3 and higher
 
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/label.png
-    :align: center
+For suggestions and questions:
+<kivydevelopment@gmail.com>
 
-- MDLabel_
-- MDIcon_
-
-.. MDLabel:
-MDLabel
--------
-
-Class :class:`MDLabel` inherited from the :class:`~kivy.uix.label.Label` class
-but for :class:`MDLabel` the ``text_size`` parameter is ``(self.width, None)``
-and default is positioned on the left:
-
-.. code-block:: python
-
-    from kivy.lang import Builder
-
-    from kivymd.app import MDApp
-
-    KV = '''
-    Screen:
-
-        BoxLayout:
-            orientation: "vertical"
-
-            MDToolbar:
-                title: "MDLabel"
-
-            MDLabel:
-                text: "MDLabel"
-    '''
-
-
-    class Test(MDApp):
-        def build(self):
-            return Builder.load_string(KV)
-
-
-    Test().run()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/md-label-to-left.png
-    :align: center
-
-.. Note:: See :attr:`~kivy.uix.label.Label.halign`
-    and :attr:`~kivy.uix.label.Label.valign` attributes
-    of the :class:`~kivy.uix.label.Label` class
-
-.. code-block:: kv
-
-        MDLabel:
-            text: "MDLabel"
-            halign: "center"
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/md-label-to-center.png
-    :align: center
-
-:class:`~MDLabel` color:
-------------------------
-
-:class:`~MDLabel` provides standard color themes for label color management:
-
-.. code-block:: python
-
-    from kivy.lang import Builder
-
-    from kivymd.app import MDApp
-    from kivymd.uix.label import MDLabel
-
-    KV = '''
-    Screen:
-
-        BoxLayout:
-            id: box
-            orientation: "vertical"
-
-            MDToolbar:
-                title: "MDLabel"
-    '''
-
-
-    class Test(MDApp):
-        def build(self):
-            screen = Builder.load_string(KV)
-            # Names of standard color themes.
-            for name_theme in [
-                "Primary",
-                "Secondary",
-                "Hint",
-                "Error",
-                "ContrastParentBackground",
-            ]:
-                screen.ids.box.add_widget(
-                    MDLabel(
-                        text=name_theme,
-                        halign="center",
-                        theme_text_color=name_theme,
-                    )
-                )
-            return screen
-
-
-    Test().run()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/md-label-theme-text-color.png
-    :align: center
-
-To use a custom color for :class:`~MDLabel`, use a theme `'Custom'`.
-After that, you can specify the desired color in the ``rgba`` format
-in the ``text_color`` parameter:
-
-.. code-block:: kv
-
-    MDLabel:
-        text: "Custom color"
-        halign: "center"
-        theme_text_color: "Custom"
-        text_color: 0, 0, 1, 1
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/md-label-custom-color.png
-    :align: center
-
-:class:`~MDLabel` provides standard font styles for labels. To do this,
-specify the name of the desired style in the :attr:`~MDLabel.font_style`
-parameter:
-
-.. code-block:: python
-
-    from kivy.lang import Builder
-
-    from kivymd.app import MDApp
-    from kivymd.uix.label import MDLabel
-    from kivymd.font_definitions import theme_font_styles
-
-
-    KV = '''
-    Screen:
-
-        BoxLayout:
-            orientation: "vertical"
-
-            MDToolbar:
-                title: "MDLabel"
-
-            ScrollView:
-
-                MDList:
-                    id: box
-    '''
-
-
-    class Test(MDApp):
-        def build(self):
-            screen = Builder.load_string(KV)
-            # Names of standard font styles.
-            for name_style in theme_font_styles[:-1]:
-                screen.ids.box.add_widget(
-                    MDLabel(
-                        text=f"{name_style} style",
-                        halign="center",
-                        font_style=name_style,
-                    )
-                )
-            return screen
-
-
-    Test().run()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/md-label-font-style.gif
-    :align: center
-
-.. MDIcon:
-MDIcon
--------
-
-You can use labels to display material design icons using the
-:class:`~MDIcon` class.
-
-.. seealso::
-
-    `Material Design Icons <https://materialdesignicons.com/>`_
-
-    `Material Design Icon Names <https://github.com/kivymd/KivyMD/blob/master/kivymd/icon_definitions.py>`_
-
-The :class:`~MDIcon` class is inherited from
-:class:`~MDLabel` and has the same parameters.
-
-.. Warning:: For the :class:`~MDIcon` class, you cannot use ``text``
-    and ``font_style`` options!
-
-.. code-block:: kv
-
-    MDIcon:
-        halign: "center"
-        icon: "language-python"
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/md-icon.png
-    :align: center
+This file is distributed under the terms of the same license,
+as the Kivy framework.
 """
 
-__all__ = ("MDLabel", "MDIcon")
-
-from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.metrics import sp
 from kivy.properties import (
-    AliasProperty,
-    BooleanProperty,
-    ColorProperty,
     OptionProperty,
+    ListProperty,
+    BooleanProperty,
     StringProperty,
+    AliasProperty,
 )
 from kivy.uix.label import Label
 
+from kivymd.font_definitions import theme_font_styles
 from kivymd.theming import ThemableBehavior
 from kivymd.theming_dynamic_text import get_contrast_text_color
-from kivymd.uix import MDAdaptiveWidget
 
 Builder.load_string(
     """
@@ -229,7 +36,7 @@ Builder.load_string(
 
 <MDLabel>
     disabled_color: self.theme_cls.disabled_hint_text_color
-    text_size: self.width, None
+    text_size: (self.width, None)
 
 
 <MDIcon>:
@@ -247,19 +54,10 @@ Builder.load_string(
 )
 
 
-class MDLabel(ThemableBehavior, Label, MDAdaptiveWidget):
-    font_style = StringProperty("Body1")
-    """
-    Label font style.
+class MDLabel(ThemableBehavior, Label):
+    font_style = OptionProperty("Body1", options=theme_font_styles)
 
-    Available vanilla font_style are: `'H1'`, `'H2'`, `'H3'`, `'H4'`, `'H5'`, `'H6'`,
-    `'Subtitle1'`, `'Subtitle2'`, `'Body1'`, `'Body2'`, `'Button'`,
-    `'Caption'`, `'Overline'`, `'Icon'`.
-
-    :attr:`font_style` is an :class:`~kivy.properties.StringProperty`
-    and defaults to `'Body1'`.
-    """
-
+    can_capitalize = BooleanProperty(True)
     _capitalizing = BooleanProperty(False)
 
     def _get_text(self):
@@ -271,12 +69,10 @@ class MDLabel(ThemableBehavior, Label, MDAdaptiveWidget):
         self._text = value
 
     _text = StringProperty()
-
     text = AliasProperty(_get_text, _set_text, bind=["_text", "_capitalizing"])
-    """Text of the label."""
 
     theme_text_color = OptionProperty(
-        "Primary",
+        None,
         allownone=True,
         options=[
             "Primary",
@@ -287,25 +83,10 @@ class MDLabel(ThemableBehavior, Label, MDAdaptiveWidget):
             "ContrastParentBackground",
         ],
     )
-    """
-    Label color scheme name.
 
-    Available options are: `'Primary'`, `'Secondary'`, `'Hint'`, `'Error'`,
-    `'Custom'`, `'ContrastParentBackground'`.
+    text_color = ListProperty(None, allownone=True)
 
-    :attr:`theme_text_color` is an :class:`~kivy.properties.OptionProperty`
-    and defaults to `None`.
-    """
-
-    text_color = ColorProperty(None)
-    """Label text color in ``rgba`` format.
-
-    :attr:`text_color` is an :class:`~kivy.properties.ColorProperty`
-    and defaults to `None`.
-    """
-
-    parent_background = ColorProperty(None)
-    can_capitalize = BooleanProperty(True)
+    parent_background = ListProperty(None, allownone=True)
 
     _currently_bound_property = {}
 
@@ -318,27 +99,15 @@ class MDLabel(ThemableBehavior, Label, MDAdaptiveWidget):
         self.on_theme_text_color(None, self.theme_text_color)
         self.update_font_style()
         self.on_opposite_colors(None, self.opposite_colors)
-        Clock.schedule_once(self.check_font_styles)
-
-    def check_font_styles(self, *dt):
-        if self.font_style not in list(self.theme_cls.font_styles.keys()):
-            raise ValueError(
-                f"MDLabel.font_style is set to an invalid option '{self.font_style}'."
-                f"Must be one of: {list(self.theme_cls.font_styles)}"
-            )
-        else:
-            return True
 
     def update_font_style(self, *args):
-        if self.check_font_styles() is True:
-            font_info = self.theme_cls.font_styles[self.font_style]
-            self.font_name = font_info[0]
-            self.font_size = sp(font_info[1])
-            if font_info[2] and self.can_capitalize:
-                self._capitalizing = True
-            else:
-                self._capitalizing = False
-
+        font_info = self.theme_cls.font_styles[self.font_style]
+        self.font_name = font_info[0]
+        self.font_size = sp(font_info[1])
+        if font_info[2] and self.can_capitalize:
+            self._capitalizing = True
+        else:
+            self._capitalizing = False
         # TODO: Add letter spacing change
         # self.letter_spacing = font_info[3]
 
@@ -382,17 +151,4 @@ class MDLabel(ThemableBehavior, Label, MDAdaptiveWidget):
 
 class MDIcon(MDLabel):
     icon = StringProperty("android")
-    """
-    Label icon name.
-
-    :attr:`icon` is an :class:`~kivy.properties.StringProperty`
-    and defaults to `'android'`.
-    """
-
     source = StringProperty(None, allownone=True)
-    """
-    Path to icon.
-
-    :attr:`source` is an :class:`~kivy.properties.StringProperty`
-    and defaults to `None`.
-    """

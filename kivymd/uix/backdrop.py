@@ -1,117 +1,287 @@
 """
-Components/Backdrop
-===================
+Backdrop
+========
 
-.. seealso::
+Tooltips display informative text when users hover over, focus on,
+or tap an element.
 
-    `Material Design spec, Backdrop <https://material.io/components/backdrop>`_
+Copyright (c) 2015 Andrés Rodríguez and KivyMD contributors -
+    KivyMD library up to version 0.1.2
+Copyright (c) 2019 Ivanov Yuri and KivyMD contributors -
+    KivyMD library version 0.1.3 and higher
 
-.. rubric:: Skeleton layout for using :class:`~MDBackdrop`:
+For suggestions and questions:
+<kivydevelopment@gmail.com>
 
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/backdrop.png
-    :align: center
+This file is distributed under the terms of the same license,
+as the Kivy framework.
 
-Usage
------
-
-.. code-block:: kv
-
-    <Root>:
-
-        MDBackdrop:
-
-            MDBackdropBackLayer:
-
-                ContentForBackdropBackLayer:
-
-            MDBackdropFrontLayer:
-
-                 ContentForBackdropFrontLayer:
+`Material Design spec, Menus <https://material.io/components/backdrop/>`_
 
 Example
 -------
 
-.. code-block:: python
+from kivy.lang import Builder
+from kivy.properties import StringProperty, BooleanProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import Screen
 
-    from kivy.lang import Builder
-    from kivy.uix.screenmanager import Screen
+from kivymd.app import MDApp
+from kivymd.theming import ThemableBehavior
 
-    from kivymd.app import MDApp
-
-    # Your layouts.
-    Builder.load_string(
-        '''
-    #:import Window kivy.core.window.Window
-    #:import IconLeftWidget kivymd.uix.list.IconLeftWidget
-
-
-    <ItemBackdropFrontLayer@TwoLineAvatarListItem>
-        icon: "android"
-
-        IconLeftWidget:
-            icon: root.icon
-
-
-    <MyBackdropFrontLayer@ItemBackdropFrontLayer>
-        backdrop: None
-        text: "Lower the front layer"
-        secondary_text: " by 50 %"
-        icon: "transfer-down"
-        on_press: root.backdrop.open(-Window.height / 2)
-        pos_hint: {"top": 1}
-        _no_ripple_effect: True
-
-
-    <MyBackdropBackLayer@Image>
-        size_hint: .8, .8
-        source: "data/logo/kivy-icon-512.png"
-        pos_hint: {"center_x": .5, "center_y": .6}
+# Your layouts.
+Builder.load_string(
     '''
-    )
+#:import NoTransition kivy.uix.screenmanager.NoTransition
+#:import Window kivy.core.window.Window
+#:import IconLeftWidget kivymd.uix.list.IconLeftWidget
 
-    # Usage example of MDBackdrop.
-    Builder.load_string(
-        '''
-    <ExampleBackdrop>
 
-        MDBackdrop:
-            id: backdrop
-            left_action_items: [['menu', lambda x: self.open()]]
-            title: "Example Backdrop"
-            radius_left: "25dp"
-            radius_right: "0dp"
-            header_text: "Menu:"
+<ItemBackdropFrontLayer@TwoLineAvatarListItem>
+    icon: "android"
 
-            MDBackdropBackLayer:
-                MyBackdropBackLayer:
-                    id: backlayer
+    IconLeftWidget:
+        icon: root.icon
 
-            MDBackdropFrontLayer:
-                MyBackdropFrontLayer:
-                    backdrop: backdrop
+
+<ItemBackdropBackLayer>
+    size_hint_y: None
+    height: self.minimum_height
+    spacing: "10dp"
+
+    canvas:
+        Color:
+            rgba:
+                root.theme_cls.primary_dark if root.selected_item \
+                else root.theme_cls.primary_color
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+
+    MDIconButton:
+        icon: root.icon
+        theme_text_color: "Custom"
+        text_color: 1, 1, 1, .5 if not root.selected_item else 1, 1, 1, 1
+
+    MDLabel:
+        text: root.text
+        color: 1, 1, 1, .5 if not root.selected_item else 1, 1, 1, 1
+
+
+<ItemBackdropBackLayerOfSecondScreen@BoxLayout>
+    size_hint_y: None
+    height: "40dp"
+    spacing: "25dp"
+    text: ""
+
+    MDCheckbox:
+        size_hint: None, None
+        size: "30dp", "30dp"
+        active: False or self.active
+        pos_hint: {"center_y": .5}
+        selected_color: 1, 1, 1, 1
+
+    MDLabel:
+        text: root.text
+        color: 1, 1, 1, .7
+
+
+<ItemRoundBackdropBackLayerOfSecondScreen@BoxLayout>
+    size_hint_y: None
+    height: "40dp"
+    spacing: "25dp"
+    text: ""
+
+    MDCheckbox:
+        group: "size"
+        size_hint: None, None
+        size: "30dp", "30dp"
+        pos_hint: {"center_y": .5}
+        selected_color: 1, 1, 1, 1
+
+    MDLabel:
+        text: root.text
+        color: 1, 1, 1, .7
+
+
+<MyBackdropFrontLayer@ScrollView>
+    backdrop: None
+    backlayer: None
+
+    GridLayout:
+        size_hint_y: None
+        height: self.minimum_height
+        cols: 1
+        padding: "5dp"
+
+        ItemBackdropFrontLayer:
+            text: "Press item"
+            secondary_text: "to Shop Electronics"
+            icon: "monitor-star"
+            on_press:
+                root.backlayer.current = "second screen"
+                root.backdrop.open()
+
+        ItemBackdropFrontLayer:
+            text: "Press item"
+            secondary_text: "to Back"
+            icon: "arrange-send-backward"
+            on_press:
+                root.backlayer.current = "one screen"
+                root.backdrop.open()
+
+        ItemBackdropFrontLayer:
+            text: "Lower the front layer"
+            secondary_text: " by 50 %"
+            icon: "transfer-down"
+            on_press:
+                root.backdrop.open(-Window.height / 2)
+
+
+<MyBackdropBackLayer@ScreenManager>
+    transition: NoTransition()
+
+    Screen:
+        name: "one screen"
+
+        ScrollView
+
+            GridLayout:
+                size_hint_y: None
+                height: self.minimum_height
+                cols: 1
+                padding: "5dp"
+
+                ItemBackdropBackLayer:
+                    icon: 'theater'
+                    text: "TV & Home Theaters"
+                ItemBackdropBackLayer:
+                    icon: 'desktop-mac'
+                    text: "Computers"
+                ItemBackdropBackLayer:
+                    icon: 'camera-plus-outline'
+                    text: "Camera and Camcorders"
+                ItemBackdropBackLayer:
+                    icon: 'speaker'
+                    text: "Speakers"
+                ItemBackdropBackLayer:
+                    icon: 'cellphone-iphone'
+                    text: "Mobile Phones"
+                ItemBackdropBackLayer:
+                    icon: 'movie-outline'
+                    text: "Movies"
+                ItemBackdropBackLayer:
+                    icon: 'gamepad-variant-outline'
+                    text: "Games"
+                ItemBackdropBackLayer:
+                    icon: 'music-circle-outline'
+                    text: "Music"
+
+    Screen:
+        name: "second screen"
+
+        ScrollView
+
+            GridLayout:
+                size_hint_y: None
+                height: self.minimum_height
+                cols: 1
+                padding: "15dp"
+                spacing: "10dp"
+
+                MDLabel:
+                    text: "Types of TVs Home Theater Product"
+                    color: 1, 1, 1, 1
+
+                Widget:
+                    size_hint_y: None
+                    height: "10dp"
+
+                ItemBackdropBackLayerOfSecondScreen:
+                    text: "Smart TV"
+                ItemBackdropBackLayerOfSecondScreen:
+                    text: "4K Ultra HD TVs"
+                ItemBackdropBackLayerOfSecondScreen:
+                    text: "Curved TVs"
+                ItemBackdropBackLayerOfSecondScreen:
+                    text: "OLED TVs"
+                ItemBackdropBackLayerOfSecondScreen:
+                    text: "LED TVs"
+                ItemBackdropBackLayerOfSecondScreen:
+                    text: "Home Theater Systems"
+
+                MDSeparator:
+
+                Widget:
+                    size_hint_y: None
+                    height: "15dp"
+
+                MDLabel:
+                    text: "Types of TVs Home Theater Product"
+                    color: 1, 1, 1, 1
+
+                ItemRoundBackdropBackLayerOfSecondScreen:
+                    text: "TVs up to 32\\""
+                ItemRoundBackdropBackLayerOfSecondScreen:
+                    text: "TVs 39\\"-50\\""
+                ItemRoundBackdropBackLayerOfSecondScreen:
+                    text: "TVs 55\\" or larger"
+'''
+)
+
+# Usage example of MDBackdrop.
+Builder.load_string(
     '''
-    )
+<ExampleBackdrop>
+
+    MDBackdrop:
+        id: backdrop
+        on_open: print("on_open")
+        on_close: print("on_close")
+        left_action_items: [['menu', lambda x: self.open()]]
+        title: "Example Backdrop"
+        header_text: "Menu:"
+
+        MDBackdropBackLayer:
+            MyBackdropBackLayer:
+                id: backlayer
+
+        MDBackdropFrontLayer:
+            MyBackdropFrontLayer:
+                backdrop: backdrop
+                backlayer: backlayer
+'''
+)
 
 
-    class ExampleBackdrop(Screen):
-        pass
+class ExampleBackdrop(Screen):
+    pass
 
 
-    class TestBackdrop(MDApp):
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
+class ItemBackdropBackLayer(ThemableBehavior, BoxLayout):
+    icon = StringProperty("android")
+    text = StringProperty()
+    selected_item = BooleanProperty(False)
 
-        def build(self):
-            return ExampleBackdrop()
+    def on_touch_down(self, touch):
+        if self.collide_point(touch.x, touch.y):
+            for item in self.parent.children:
+                if item.selected_item:
+                    item.selected_item = False
+            self.selected_item = True
+        return super().on_touch_down(touch)
 
 
-    TestBackdrop().run()
+class Test(MDApp):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.theme_cls.primary_palette = "DeepPurple"
 
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/backdrop.gif
-    :width: 280 px
-    :align: center
+    def build(self):
+        return ExampleBackdrop()
 
-.. Note:: `See full example <https://github.com/kivymd/KivyMD/wiki/Components-Backdrop>`_
+
+Test().run()
 """
 
 __all__ = (
@@ -124,18 +294,17 @@ __all__ = (
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.lang import Builder
+from kivy.metrics import dp
 from kivy.properties import (
-    BooleanProperty,
-    ColorProperty,
     ListProperty,
     NumericProperty,
+    BooleanProperty,
     StringProperty,
 )
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 
 from kivymd.theming import ThemableBehavior
-from kivymd.uix.behaviors import FakeRectangularElevationBehavior
 from kivymd.uix.card import MDCard
 from kivymd.uix.toolbar import MDToolbar
 
@@ -146,8 +315,8 @@ Builder.load_string(
     canvas:
         Color:
             rgba:
-                root.theme_cls.primary_color if not root.back_layer_color \
-                else root.back_layer_color
+                root.theme_cls.primary_color if not root.background_color \
+                else root.background_color
         Rectangle:
             pos: self.pos
             size: self.size
@@ -157,8 +326,8 @@ Builder.load_string(
         title: root.title
         elevation: 0
         md_bg_color:
-            root.theme_cls.primary_color if not root.back_layer_color \
-            else root.back_layer_color
+            root.theme_cls.primary_color if not root.background_color \
+            else root.background_color
         left_action_items: root.left_action_items
         right_action_items: root.right_action_items
         pos_hint: {'top': 1}
@@ -178,16 +347,14 @@ Builder.load_string(
 
         canvas:
             Color:
-                rgba:
-                    root.theme_cls.bg_normal if not root.front_layer_color \
-                    else root.front_layer_color
+                rgba: root.theme_cls.bg_normal
             RoundedRectangle:
                 pos: self.pos
                 size: self.size
-                radius:
+                radius: 
                     [
-                    (root.radius_left, root.radius_left),
-                    (root.radius_right, root.radius_right),
+                    (root.radius, root.radius),
+                    (0, 0),
                     (0, 0),
                     (0, 0)
                     ]
@@ -206,107 +373,68 @@ Builder.load_string(
 )
 
 
+class _BackLayer(BoxLayout):
+    pass
+
+
+class _FrontLayer(MDCard):
+    pass
+
+
+class MDBackdropToolbar(MDToolbar):
+    pass
+
+
+class MDBackdropFrontLayer(BoxLayout):
+    pass
+
+
+class MDBackdropBackLayer(BoxLayout):
+    pass
+
+
 class MDBackdrop(ThemableBehavior, FloatLayout):
     """
     :Events:
-        :attr:`on_open`
+        `on_open`
             When the front layer drops.
-        :attr:`on_close`
+        `on_close`
             When the front layer rises.
     """
 
     padding = ListProperty([0, 0, 0, 0])
-    """
-    Padding for contents of the front layer.
-
-    :attr:`padding` is an :class:`~kivy.properties.ListProperty`
-    and defaults to `[0, 0, 0, 0]`.
-    """
+    """Padding for contents of the front layer."""
 
     left_action_items = ListProperty()
-    """
-    The icons and methods left of the :class:`kivymd.uix.toolbar.MDToolbar`
-    in back layer. For more information, see the :class:`kivymd.uix.toolbar.MDToolbar` module
-    and :attr:`left_action_items` parameter.
-
-    :attr:`left_action_items` is an :class:`~kivy.properties.ListProperty`
-    and defaults to `[]`.
+    """The icons and methods left of the MDToolbar in back layer.
+    For more information, see the `kivymd/uix/toolbar.MDToolbar` module
+    and `left_action_items` parameter.
     """
 
     right_action_items = ListProperty()
-    """
-    Works the same way as :attr:`left_action_items`.
-
-    :attr:`right_action_items` is an :class:`~kivy.properties.ListProperty`
-    and defaults to `[]`.
-    """
+    """Works the same way as :attr: `left_action_items`."""
 
     title = StringProperty()
-    """
-    See the :class:`kivymd.uix.toolbar.MDToolbar.title` parameter.
+    """See the `kivymd/uix/toolbar.MDToolbar` module
+    and `title` parameter."""
 
-    :attr:`title` is an :class:`~kivy.properties.StringProperty`
-    and defaults to `''`.
-    """
+    background_color = ListProperty()
+    """Background color of back layer."""
 
-    back_layer_color = ColorProperty(None)
-    """
-    Background color of back layer.
-
-    :attr:`back_layer_color` is an :class:`~kivy.properties.ColorProperty`
-    and defaults to `None`.
-    """
-
-    front_layer_color = ColorProperty(None)
-    """
-    Background color of front layer.
-
-    :attr:`front_layer_color` is an :class:`~kivy.properties.ColorProperty`
-    and defaults to `None`.
-    """
-
-    radius_left = NumericProperty("16dp")
-    """
-    The value of the rounding radius of the upper left corner
+    radius = NumericProperty(25)
+    """The value of the rounding radius of the upper left corner
     of the front layer.
-
-    :attr:`radius_left` is an :class:`~kivy.properties.NumericProperty`
-    and defaults to `16dp`.
-    """
-
-    radius_right = NumericProperty("16dp")
-    """
-    The value of the rounding radius of the upper right corner
-    of the front layer.
-
-    :attr:`radius_right` is an :class:`~kivy.properties.NumericProperty`
-    and defaults to `16dp`.
     """
 
     header = BooleanProperty(True)
-    """
-    Whether to use a header above the contents of the front layer.
-
-    :attr:`header` is an :class:`~kivy.properties.BooleanProperty`
-    and defaults to `True`.
-    """
+    """Whether to use a header above the contents of the front layer."""
 
     header_text = StringProperty("Header")
-    """
-    Text of header.
-
-    :attr:`header_text` is an :class:`~kivy.properties.StringProperty`
-    and defaults to `'Header'`.
-    """
+    """Text of header."""
 
     close_icon = StringProperty("close")
-    """
-    The name of the icon that will be installed on the toolbar
-    on the left when opening the front layer.
-
-    :attr:`close_icon` is an :class:`~kivy.properties.StringProperty`
-    and defaults to `'close'`.
-    """
+    """The name of the icon that will be installed on the toolbar
+    on the left when opening the front layer."""
 
     _open_icon = ""
     _front_layer_open = False
@@ -320,10 +448,10 @@ class MDBackdrop(ThemableBehavior, FloatLayout):
         )
 
     def on_open(self):
-        """When the front layer drops."""
+        pass
 
     def on_close(self):
-        """When the front layer rises."""
+        pass
 
     def on_left_action_items(self, instance, value):
         if value:
@@ -349,19 +477,10 @@ class MDBackdrop(ThemableBehavior, FloatLayout):
         if self._front_layer_open:
             self.close()
             return
-
         if open_up_to:
-            if open_up_to < (
-                self.ids.header_button.height - self.ids._front_layer.height
-            ):
-                y = self.ids.header_button.height - self.ids._front_layer.height
-            elif open_up_to > 0:
-                y = 0
-            else:
-                y = open_up_to
+            y = open_up_to
         else:
-            y = self.ids.header_button.height - self.ids._front_layer.height
-
+            y = dp(120) - self.height
         Animation(y=y, d=0.2, t="out_quad").start(self.ids._front_layer)
         self._front_layer_open = True
         self.dispatch("on_open")
@@ -388,30 +507,10 @@ class MDBackdrop(ThemableBehavior, FloatLayout):
         Animation(opacity=1, d=0.2).start(instance_icon_menu)
 
     def add_widget(self, widget, index=0, canvas=None):
-        if widget.__class__ in (MDBackdropToolbar, _BackLayer, _FrontLayer):
+        if widget.__class__ in (MDBackdropToolbar, _BackLayer, _FrontLayer,):
             return super().add_widget(widget)
         else:
             if widget.__class__ is MDBackdropBackLayer:
                 self.ids.back_layer.add_widget(widget)
             elif widget.__class__ is MDBackdropFrontLayer:
                 self.ids.front_layer.add_widget(widget)
-
-
-class MDBackdropToolbar(MDToolbar):
-    pass
-
-
-class MDBackdropFrontLayer(BoxLayout):
-    pass
-
-
-class MDBackdropBackLayer(BoxLayout):
-    pass
-
-
-class _BackLayer(BoxLayout):
-    pass
-
-
-class _FrontLayer(MDCard, FakeRectangularElevationBehavior):
-    pass

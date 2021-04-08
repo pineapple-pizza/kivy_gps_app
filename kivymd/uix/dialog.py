@@ -155,7 +155,7 @@ Builder.load_string(
         orientation: 'vertical'
         padding: dp(15)
         spacing: dp(10)
-    
+
         MDLabel:
             id: title
             text: root.title
@@ -185,17 +185,18 @@ Builder.load_string(
                 size_hint_y: None
                 height: self.minimum_height
                 spacing: dp(15)
+        
                 canvas.before:
                     Rectangle:
                         pos: self.pos
                         size: self.size
                     Color:
-                        rgba: [1,0,0,.5]   
+                        rgba: [1,0,0,.5]
                 ThinBox:
                     ThinLabel:
                         text: "Address: "
                     ThinLabelButton:
-                        text: root.address
+                        text: root.Address
                         on_release:
                             webbrowser.open("http://maps.apple.com/?address="+parse.quote(self.text))
                 ThinBox:
@@ -217,6 +218,22 @@ Builder.load_string(
                         text: "Twitter: "
                     ThinLabelButton:
                         text: root.Twitter
+                        on_release:
+                            webbrowser.open(self.text)
+                            
+                ThinBox:
+                    ThinLabel:
+                        text: "Youtube: "
+                    ThinLabelButton:
+                        text: root.Youtube
+                        on_release:
+                            webbrowser.open(self.text)
+                            
+                ThinBox:
+                    ThinLabel:
+                        text: "Races: "
+                    ThinLabelButton:
+                        text: root.Races
                         on_release:
                             webbrowser.open(self.text)
         MDSeparator:
@@ -381,10 +398,12 @@ class BaseDialog(ThemableBehavior, ModalView):
 
 class ListMDDialog(BaseDialog):
     name = StringProperty("Missing data")
-    address = StringProperty("Missing data")
+    Address = StringProperty("Missing data")
     Website = StringProperty("Missing data")
     Facebook = StringProperty("Missing data")
     Twitter = StringProperty("Missing data")
+    Youtube = StringProperty("Missing data")
+    Races = StringProperty("Missing data")
     background = StringProperty('{}ios_bg_mod.png'.format(images_path))
 
 

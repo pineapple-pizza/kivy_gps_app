@@ -1,174 +1,31 @@
 """
-Components/Selection Controls
-=============================
+Selection Controls
+==================
 
-.. seealso::
+Copyright (c) 2015 Andrés Rodríguez and KivyMD contributors -
+    KivyMD library up to version 0.1.2
+Copyright (c) 2019 Ivanov Yuri and KivyMD contributors -
+    KivyMD library version 0.1.3 and higher
 
-    `Material Design spec, Selection controls <https://material.io/components/selection-controls>`_
+For suggestions and questions:
+<kivydevelopment@gmail.com>
 
-.. rubric:: Selection controls allow the user to select options.
+This file is distributed under the terms of the same license,
+as the Kivy framework.
 
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/selection-controll.png
-    :align: center
-
-`KivyMD` provides the following selection controls classes for use:
-
-- MDCheckbox_
-- MDSwitch_
-
-.. MDCheckbox:
-MDCheckbox
-----------
-
-.. code-block:: python
-
-    from kivy.lang import Builder
-
-    from kivymd.app import MDApp
-
-
-    KV = '''
-    MDFloatLayout:
-
-        MDCheckbox:
-            size_hint: None, None
-            size: "48dp", "48dp"
-            pos_hint: {'center_x': .5, 'center_y': .5}
-    '''
-
-
-    class Test(MDApp):
-        def build(self):
-            return Builder.load_string(KV)
-
-
-    Test().run()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/checkbox.gif
-    :align: center
-
-.. Note:: Be sure to specify the size of the checkbox. By default, it is
-    ``(dp(48), dp(48))``, but the ripple effect takes up all the available
-    space.
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/checkbox-no-size.gif
-    :align: center
-
-Control state
--------------
-
-.. code-block:: kv
-
-    MDCheckbox:
-        on_active: app.on_checkbox_active(*args)
-
-.. code-block:: python
-
-    def on_checkbox_active(self, checkbox, value):
-        if value:
-            print('The checkbox', checkbox, 'is active', 'and', checkbox.state, 'state')
-        else:
-            print('The checkbox', checkbox, 'is inactive', 'and', checkbox.state, 'state')
-
-MDCheckbox with group
----------------------
-
-.. code-block:: python
-
-    from kivy.lang import Builder
-
-    from kivymd.app import MDApp
-
-    KV = '''
-    <Check@MDCheckbox>:
-        group: 'group'
-        size_hint: None, None
-        size: dp(48), dp(48)
-
-
-    MDFloatLayout:
-
-        Check:
-            active: True
-            pos_hint: {'center_x': .4, 'center_y': .5}
-
-        Check:
-            pos_hint: {'center_x': .6, 'center_y': .5}
-    '''
-
-
-    class Test(MDApp):
-        def build(self):
-            return Builder.load_string(KV)
-
-
-    Test().run()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/checkbox-group.gif
-    :align: center
-
-.. MDSwitch:
-MDSwitch
---------
-
-.. code-block:: python
-
-    from kivy.lang import Builder
-
-    from kivymd.app import MDApp
-
-    KV = '''
-    MDFloatLayout:
-
-        MDSwitch:
-            pos_hint: {'center_x': .5, 'center_y': .5}
-    '''
-
-
-    class Test(MDApp):
-        def build(self):
-            return Builder.load_string(KV)
-
-
-    Test().run()
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/md-switch.gif
-    :align: center
-
-.. Note:: For :class:`~MDSwitch` size is not required. By default it is
-    ``(dp(36), dp(48))``, but you can increase the width if you want.
-
-.. code-block:: kv
-
-    MDSwitch:
-        width: dp(64)
-
-.. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/md-switch_width.png
-    :align: center
-
-.. Note:: Control state of :class:`~MDSwitch` same way as in
-    :class:`~MDCheckbox`.
+`Material Design spec, Selection controls <https://material.io/design/components/selection-controls.html>`_
 """
 
-__all__ = ("MDCheckbox", "MDSwitch")
-
-from kivy.animation import Animation
-from kivy.clock import Clock
 from kivy.lang import Builder
-from kivy.metrics import dp, sp
-from kivy.properties import (
-    AliasProperty,
-    BooleanProperty,
-    ColorProperty,
-    ListProperty,
-    NumericProperty,
-    OptionProperty,
-    StringProperty,
-)
-from kivy.uix.behaviors import ButtonBehavior, ToggleButtonBehavior
+from kivy.properties import StringProperty, ListProperty, NumericProperty
+from kivy.uix.behaviors import ToggleButtonBehavior
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.widget import Widget
+from kivy.properties import AliasProperty, BooleanProperty
+from kivy.metrics import dp, sp
+from kivy.animation import Animation
 from kivy.utils import get_color_from_hex
+from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.widget import Widget
 
 from kivymd.color_definitions import colors
 from kivymd.theming import ThemableBehavior
@@ -211,38 +68,25 @@ Builder.load_string(
     canvas.before:
         Color:
             rgba:
-                self._track_color_disabled if self.disabled else \
-                ( \
-                self._track_color_active \
-                if self.active else self._track_color_normal \
-                )
+                self._track_color_disabled if self.disabled else\
+                (self._track_color_active if self.active\
+                else self._track_color_normal)
+        #Ellipse:
+        #    size: dp(8), dp(16)
+        #    pos: self.x, self.center_y - dp(8)
+        #    angle_start: 180
+        #    angle_end: 360
         RoundedRectangle:
-            size:
-                (self.width + dp(14), dp(28)) \
-                if root.widget_style == "ios" else \
-                (self.width - dp(8), dp(16))
-            pos:
-                (self.x - dp(2), self.center_y - dp(14)) \
-                if root.widget_style == "ios" else \
-                (self.x + dp(8), self.center_y - dp(8))
-            radius:
-                [dp(14)] if root.widget_style == "ios" else [dp(7)]
-        Color:
-            rgba:
-                ( \
-                self.theme_cls.disabled_hint_text_color[:-1] + [.2] \
-                if not root.active else (0, 0, 0, 0) \
-                ) \
-                if root.widget_style == "ios" else (0, 0, 0, 0)
-        Line:
-            width: 1
-            rounded_rectangle:
-                ( \
-                self.x - dp(2), self.center_y - dp(14), self.width + dp(14), \
-                dp(28), dp(14), dp(14), dp(14), dp(14), dp(28) \
-                ) \
-                if root.widget_style == "ios" else \
-                (1, 1, 1, 1, 1, 1, 1, 1, 1)
+            size: self.width - dp(8), dp(16)
+            pos: self.x + dp(8), self.center_y - dp(8)
+            radius: [dp(7)]
+        #Ellipse:
+        #    size: dp(8), dp(16)
+        #    pos: self.right - dp(4), self.center_y - dp(8)
+        #    angle_start: 0
+        #    angle_end: 180
+
+    on_release: thumb.trigger_action()
 
     Thumb:
         id: thumb
@@ -250,84 +94,26 @@ Builder.load_string(
         size: dp(24), dp(24)
         pos: root.pos[0] + root._thumb_pos[0], root.pos[1] + root._thumb_pos[1]
         color:
-            root.thumb_color_disabled if root.disabled else \
+            root.thumb_color_disabled if root.disabled else\
             (root.thumb_color_down if root.active else root.thumb_color)
-        elevation: 8 if root.active else 5
-        on_release: setattr(root, "active", not root.active)
+        elevation:    4 if root.active else 2
+        on_release: setattr(root, 'active', not root.active)
 """
 )
 
 
 class MDCheckbox(CircularRippleBehavior, ToggleButtonBehavior, MDIcon):
     active = BooleanProperty(False)
-    """
-    Indicates if the checkbox is active or inactive.
-
-    :attr:`active` is a :class:`~kivy.properties.BooleanProperty`
-    and defaults to `False`.
-    """
 
     checkbox_icon_normal = StringProperty("checkbox-blank-outline")
-    """
-    Background icon of the checkbox used for the default graphical
-    representation when the checkbox is not pressed.
-
-    :attr:`checkbox_icon_normal` is a :class:`~kivy.properties.StringProperty`
-    and defaults to `'checkbox-blank-outline'`.
-    """
-
-    checkbox_icon_down = StringProperty("checkbox-marked")
-    """
-    Background icon of the checkbox used for the default graphical
-    representation when the checkbox is pressed.
-
-    :attr:`checkbox_icon_down` is a :class:`~kivy.properties.StringProperty`
-    and defaults to `'checkbox-marked'`.
-    """
-
+    checkbox_icon_down = StringProperty("checkbox-marked-outline")
     radio_icon_normal = StringProperty("checkbox-blank-circle-outline")
-    """
-    Background icon (when using the ``group`` option) of the checkbox used for
-    the default graphical representation when the checkbox is not pressed.
+    radio_icon_down = StringProperty("checkbox-marked-circle-outline")
 
-    :attr:`radio_icon_normal` is a :class:`~kivy.properties.StringProperty`
-    and defaults to `'checkbox-blank-circle-outline'`.
-    """
-
-    radio_icon_down = StringProperty("checkbox-marked-circle")
-    """
-    Background icon (when using the ``group`` option) of the checkbox used for
-    the default graphical representation when the checkbox is pressed.
-
-    :attr:`radio_icon_down` is a :class:`~kivy.properties.StringProperty`
-    and defaults to `'checkbox-marked-circle'`.
-    """
-
-    selected_color = ColorProperty(None)
-    """
-    Selected color in ``rgba`` format.
-
-    :attr:`selected_color` is a :class:`~kivy.properties.ColorProperty`
-    and defaults to `None`.
-    """
-
-    unselected_color = ColorProperty(None)
-    """
-    Unelected color in ``rgba`` format.
-
-    :attr:`unselected_color` is a :class:`~kivy.properties.ColorProperty`
-    and defaults to `None`.
-    """
-
-    disabled_color = ColorProperty(None)
-    """
-    Disabled color in ``rgba`` format.
-
-    :attr:`disabled_color` is a :class:`~kivy.properties.ColorProperty`
-    and defaults to `None`.
-    """
-
-    _current_color = ColorProperty([0.0, 0.0, 0.0, 0.0])
+    selected_color = ListProperty()
+    unselected_color = ListProperty()
+    disabled_color = ListProperty()
+    _current_color = ListProperty([0.0, 0.0, 0.0, 0.0])
 
     def __init__(self, **kwargs):
         self.check_anim_out = Animation(font_size=0, duration=0.1, t="out_quad")
@@ -354,19 +140,8 @@ class MDCheckbox(CircularRippleBehavior, ToggleButtonBehavior, MDIcon):
             disabled=self.update_color,
             state=self.update_color,
         )
-        self.theme_cls.bind(primary_color=self.update_primary_color)
-        self.theme_cls.bind(theme_style=self.update_primary_color)
         self.update_icon()
         self.update_color()
-
-    def update_primary_color(self, instance, value):
-        if value in ("Dark", "Light"):
-            if not self.disabled:
-                self.color = self.theme_cls.primary_color
-            else:
-                self.color = self.disabled_color
-        else:
-            self.selected_color = value
 
     def update_icon(self, *args):
         if self.state == "down":
@@ -393,13 +168,10 @@ class MDCheckbox(CircularRippleBehavior, ToggleButtonBehavior, MDIcon):
             self.check_anim_in.cancel(self)
             self.check_anim_out.start(self)
             self.update_icon()
-            if self.group:
-                self._release_group(self)
             self.active = True
         else:
             self.check_anim_in.cancel(self)
-            if not self.group:
-                self.check_anim_out.start(self)
+            self.check_anim_out.start(self)
             self.update_icon()
             self.active = False
 
@@ -411,20 +183,14 @@ class Thumb(
     CircularElevationBehavior, CircularRippleBehavior, ButtonBehavior, Widget
 ):
     ripple_scale = NumericProperty(2)
-    """
-    See :attr:`~kivymd.uix.behaviors.ripplebehavior.CommonRipple.ripple_scale`.
-
-    :attr:`ripple_scale` is a :class:`~kivy.properties.NumericProperty`
-    and defaults to `2`.
-    """
 
     def _set_ellipse(self, instance, value):
-        self.ellipse.size = (self._ripple_rad, self._ripple_rad)
-        if self.ellipse.size[0] > self.width * 1.5 and not self._fading_out:
+        self.ellipse.size = (self.ripple_rad, self.ripple_rad)
+        if self.ellipse.size[0] > self.width * 1.5 and not self.fading_out:
             self.fade_out()
         self.ellipse.pos = (
-            self.center_x - self._ripple_rad / 2.0,
-            self.center_y - self._ripple_rad / 2.0,
+            self.center_x - self.ripple_rad / 2.0,
+            self.center_y - self.ripple_rad / 2.0,
         )
         self.stencil.pos = (
             self.center_x - (self.width * self.ripple_scale) / 2,
@@ -434,14 +200,8 @@ class Thumb(
 
 class MDSwitch(ThemableBehavior, ButtonBehavior, FloatLayout):
     active = BooleanProperty(False)
-    """
-    Indicates if the switch is active or inactive.
 
-    :attr:`active` is a :class:`~kivy.properties.BooleanProperty`
-    and defaults to `False`.
-    """
-
-    _thumb_color = ColorProperty(get_color_from_hex(colors["Gray"]["50"]))
+    _thumb_color = ListProperty(get_color_from_hex(colors["Gray"]["50"]))
 
     def _get_thumb_color(self):
         return self._thumb_color
@@ -457,14 +217,8 @@ class MDSwitch(ThemableBehavior, ButtonBehavior, FloatLayout):
     thumb_color = AliasProperty(
         _get_thumb_color, _set_thumb_color, bind=["_thumb_color"]
     )
-    """
-    Get thumb color ``rgba`` format.
 
-    :attr:`thumb_color` is an :class:`~kivy.properties.AliasProperty`
-    and property is readonly.
-    """
-
-    _thumb_color_down = ColorProperty([1, 1, 1, 1])
+    _thumb_color_down = ListProperty([1, 1, 1, 1])
 
     def _get_thumb_color_down(self):
         return self._thumb_color_down
@@ -481,17 +235,15 @@ class MDSwitch(ThemableBehavior, ButtonBehavior, FloatLayout):
         elif len(color) == 4:
             self._thumb_color_down = color
 
-    _thumb_color_disabled = ColorProperty(
+    thumb_color_down = AliasProperty(
+        _get_thumb_color_down, _set_thumb_color_down, bind=["_thumb_color_down"]
+    )
+
+    _thumb_color_disabled = ListProperty(
         get_color_from_hex(colors["Gray"]["400"])
     )
 
     thumb_color_disabled = get_color_from_hex(colors["Gray"]["800"])
-    """
-    Get thumb color disabled ``rgba`` format.
-
-    :attr:`thumb_color_disabled` is an :class:`~kivy.properties.AliasProperty`
-    and property is readonly.
-    """
 
     def _get_thumb_color_disabled(self):
         return self._thumb_color_disabled
@@ -511,34 +263,10 @@ class MDSwitch(ThemableBehavior, ButtonBehavior, FloatLayout):
         _set_thumb_color_disabled,
         bind=["_thumb_color_disabled"],
     )
-    """
-    Get thumb color down ``rgba`` format.
 
-    :attr:`thumb_color_down` is an :class:`~kivy.properties.AliasProperty`
-    and property is readonly.
-    """
-
-    theme_thumb_color = OptionProperty("Primary", options=["Primary", "Custom"])
-    """
-    Thumb color scheme name
-
-    :attr:`theme_thumb_color` is an :class:`~kivy.properties.OptionProperty`
-    and defaults to `Primary`.
-    """
-
-    theme_thumb_down_color = OptionProperty(
-        "Primary", options=["Primary", "Custom"]
-    )
-    """
-    Thumb Down color scheme name
-
-    :attr:`theme_thumb_down_color` is an :class:`~kivy.properties.OptionProperty`
-    and defaults to `Primary`.
-    """
-
-    _track_color_active = ColorProperty([0, 0, 0, 0])
-    _track_color_normal = ColorProperty([0, 0, 0, 0])
-    _track_color_disabled = ColorProperty([0, 0, 0, 0])
+    _track_color_active = ListProperty()
+    _track_color_normal = ListProperty()
+    _track_color_disabled = ListProperty()
     _thumb_pos = ListProperty([0, 0])
 
     def __init__(self, **kwargs):
@@ -549,50 +277,30 @@ class MDSwitch(ThemableBehavior, ButtonBehavior, FloatLayout):
             primary_palette=self._set_colors,
         )
         self.bind(active=self._update_thumb_pos)
-        Clock.schedule_once(self._set_colors)
-        self.size_hint = (None, None)
-        self.size = (dp(36), dp(48))
+        self._set_colors()
 
     def _set_colors(self, *args):
         self._track_color_normal = self.theme_cls.disabled_hint_text_color
         if self.theme_cls.theme_style == "Dark":
-
-            if self.theme_thumb_down_color == "Primary":
-                self._track_color_active = self.theme_cls.primary_color
-            else:
-                self._track_color_active = self.thumb_color_down
-
+            self._track_color_active = self.theme_cls.primary_color
             self._track_color_active[3] = 0.5
             self._track_color_disabled = get_color_from_hex("FFFFFF")
             self._track_color_disabled[3] = 0.1
-
-            if self.theme_thumb_color == "Primary":
-                self.thumb_color = get_color_from_hex(colors["Gray"]["400"])
-
-            if self.theme_thumb_down_color == "Primary":
-                self.thumb_color_down = get_color_from_hex(
-                    colors[self.theme_cls.primary_palette]["200"]
-                )
+            self.thumb_color = get_color_from_hex(colors["Gray"]["400"])
+            self.thumb_color_down = get_color_from_hex(
+                colors[self.theme_cls.primary_palette]["200"]
+            )
         else:
-            if self.theme_thumb_down_color == "Primary":
-                self._track_color_active = get_color_from_hex(
-                    colors[self.theme_cls.primary_palette]["200"]
-                )
-            else:
-                self._track_color_active = self.thumb_color_down
-
+            self._track_color_active = get_color_from_hex(
+                colors[self.theme_cls.primary_palette]["200"]
+            )
             self._track_color_active[3] = 0.5
             self._track_color_disabled = self.theme_cls.disabled_hint_text_color
-
-            if self.theme_thumb_down_color == "Primary":
-                self.thumb_color_down = self.theme_cls.primary_color
-
-            if self.theme_thumb_color == "Primary":
-                self.thumb_color = get_color_from_hex(colors["Gray"]["50"])
+            self.thumb_color_down = self.theme_cls.primary_color
 
     def _update_thumb_pos(self, *args, animation=True):
         if self.active:
-            _thumb_pos = (self.width - dp(14), self.height / 2 - dp(12))
+            _thumb_pos = (self.width - dp(12), self.height / 2 - dp(12))
         else:
             _thumb_pos = (0, self.height / 2 - dp(12))
         Animation.cancel_all(self, "_thumb_pos")
