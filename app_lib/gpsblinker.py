@@ -3,7 +3,7 @@ from kivy.animation import Animation
 
 class GpsBlinker(MapMarker):
     def blink(self):
-        """ animaation that changes the blink size opacity"""
+        """ animation that changes the blink size opacity"""
         anim = Animation(outer_opacity=0, blink_size=50)
         """when animation is completed, reset it and repeat"""
         anim.bind(on_complete=self.reset)

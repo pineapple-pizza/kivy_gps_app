@@ -8,7 +8,6 @@ class MainApp(MDApp):
     connection = None
     cursor = None
     search_menu = None
-    add_farm_popup = None
     icon = 'assets/dogs_icon_teal.png'
     markup = False
     

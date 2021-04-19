@@ -23,6 +23,8 @@ class SearchPopupMenu(MDInputDialog):
         self.geocode_get_lat_lon(address)
         
     def geocode_get_lat_lon(self, address):
+        """connect to here api with coordinates (address)"""
+        
         api_key = config('API_KEY')
         address = parse.quote(address)
         url = "https://geocoder.ls.hereapi.com/6.2/geocode.json?apiKey=%s&searchtext=%s"%(api_key, address)
@@ -30,6 +32,8 @@ class SearchPopupMenu(MDInputDialog):
         UrlRequest(url, on_success=self.success, on_failure=self.failure, on_error=self.error)
         
     def success(self, urlrequest, result):
+        """get latitude and longitude"""
+        
         latitude = result['Response']['View'][0]['Result'][0]['Location']['NavigationPosition'][0]['Latitude']
         longitude = result['Response']['View'][0]['Result'][0]['Location']['NavigationPosition'][0]['Longitude']
         app = App.get_running_app()
